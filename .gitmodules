@@ -1,3 +1,3 @@
-[submodule "microscanner"]
-	path = microscanner
+[submodule "src/microscanner"]
+	path = src/microscanner
 	url = git@github.com:nicole-cranon/microscanner.git
