@@ -4,7 +4,7 @@
    assignment 2 - micro parser
  */
 
-#include "microscanner/src/scanner.h"
+#include "parser.h"
 #include <iostream>
 
 int main (int argc, char* argv[]) {
@@ -21,18 +21,8 @@ int main (int argc, char* argv[]) {
 
   }
 
-  // holds the current token as we read the file
-  scanner::token readToken;
-
-  do {
-
-    // get next token
-    readToken = scanner::scan ();
-
-    // print read token symbol and the contents of the buffer
-    std::cout << "Token : " <<  scanner::token_type[readToken] << " \"" << scanner::tokenBuffer << "\"" <<  '\n';
-
-  } while (readToken != scanner::EofSym);
+  // parse provided file
+  parser::systemGoal();
 
   // close the file stream
   scanner::file.close();
