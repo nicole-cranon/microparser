@@ -5,6 +5,7 @@
  */
 
 #include "parser.h"
+#include "compiler.h"
 #include <iostream>
 #include <cstdlib>
 
@@ -18,8 +19,9 @@ namespace parser {
 
     currentToken = scanner::scan();
 
+		std::cout << "\nCurrent Token -> " << scanner::token_type[currentToken] << '\n';
    
-      std::cerr << "\nCurrentToken " << scanner::token_type[currentToken] << " Expected Token " << scanner::token_type[t] << '\n';
+//      std::cerr << "\nCurrentToken " << scanner::token_type[currentToken] << " Expected Token " << scanner::token_type[t] << '\n';
     if (currentToken != t) {
    
       syntaxError (currentToken); 
@@ -45,6 +47,8 @@ namespace parser {
 
     match (scanner::EofSym);
 
+		compiler::finish();
+
     std::cout << "\nEnd systemGoal\n";
 
   }
@@ -54,6 +58,7 @@ namespace parser {
     std::cout << "\nIn program\n" ;
     match (scanner::BeginSym);
 
+		compiler::start();
     stmtList ();
 
     match (scanner::EndSym);
@@ -88,6 +93,9 @@ namespace parser {
 
   void statement () {
 
+		compiler::exprRec identifier,
+			expr;
+
     std::cout << "\nIn statement\n";
     nextToken = getNextToken();
 
@@ -95,9 +103,10 @@ namespace parser {
 
       case (scanner::Id) :
 
-        ident ();
+        ident (identifier);
         match (scanner::AssignOp);
-        expression();
+        expression(expr);
+				compiler::assign (identifier, expr);
         match (scanner::SemiColon);
 
         break;
@@ -133,9 +142,12 @@ namespace parser {
 
   void idList () {
 
+		compiler::exprRec identifier;
+
     std::cout << "\nIn idList\n";
 
-    ident();
+    ident(identifier);
+		compiler::readId(identifier);
 
     nextToken = getNextToken();
 
@@ -151,10 +163,12 @@ namespace parser {
 
   }
 
-  void ident () {
+  void ident (compiler::exprRec& expr) {
 
     std::cout << "\nIn ident\n";
     match (scanner::Id);
+
+		compiler::processId (expr);
 
     std::cout << "\nEnd ident\n";
 
@@ -162,9 +176,12 @@ namespace parser {
 
   void exprList () {
 
+		compiler::exprRec expr;
+
     std::cout << "\nIn exprList\n";
 
-    expression ();
+    expression (expr);
+		compiler::writeExpr(expr);
 
     nextToken = getNextToken();
 
@@ -180,26 +197,37 @@ namespace parser {
 
   }
 
-  void expression () {
-   
+  void expression (compiler::exprRec& result) {
+  
+		compiler::exprRec leftOperand, rightOperand;
+		compiler::opRec opRecord;
+
     std::cout << "\nIn expression\n";
 
-    primary ();
+    primary (leftOperand);
 
     nextToken = getNextToken();
 
     if (nextToken == scanner::PlusOp || nextToken == scanner::MinusOp) {
 
-        addOp ();
-        expression ();
+        addOp (opRecord);
+        expression (rightOperand);
+
+				result = compiler::genInfix (leftOperand, opRecord, rightOperand);
 
     }
 
-    std::cout << "\nEnd expression\n";
+		else {
+
+			result = leftOperand;
+			
+		}
+
+		std::cout << "\nEnd expression\n";
 
   }
 
-  void primary ()  {
+  void primary (compiler::exprRec& result)  {
 
     std::cout << "\nIn primary\n";
 
@@ -209,18 +237,19 @@ namespace parser {
 
       case (scanner::Id):
 
-        ident();
+        ident(result);
         break;
 
       case (scanner::IntLiteral):
 
         match (scanner::IntLiteral);
+				compiler::processLiteral (result);
         break;
 
       case (scanner::LParen):
 
         match (scanner::LParen);
-        expression ();
+        expression (result);
         match (scanner::RParen);
 
         break;
@@ -235,7 +264,7 @@ namespace parser {
 
   }
 
-  void addOp () {
+  void addOp (compiler::opRec& o) {
 
     std::cout << "\nIn addOp\n";
 
@@ -244,11 +273,16 @@ namespace parser {
     switch (nextToken) {
 
       case (scanner::PlusOp) :
+
         match (scanner::PlusOp);
+				compiler::processOp (o);
         break;
 
       case (scanner::MinusOp) :
+
         match (scanner::MinusOp);
+				compiler::processOp (o);
+
         break;
 
       default:

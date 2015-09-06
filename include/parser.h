@@ -8,6 +8,7 @@
 #define _PARSER
 
 #include "scanner.h"
+#include "compiler.h"
 
 // TODO : Add equality and exponential operator productions
 
@@ -100,12 +101,13 @@ namespace parser {
     ident
 
     precondition -
-    if stream object scanner::file opened for a specific file
+    if stream object scanner::file opened for a specific file, and an
+		expression record
 
     postcondition - 
-    checks for the id token
+    checks for the id token and populates the given expression record
    */
-  void ident ();
+  void ident (compiler::exprRec& idExpr);
 
   /*
     exprList
@@ -123,13 +125,15 @@ namespace parser {
     expression
 
     precondition -
-    if stream object scanner::file opened for a specific file
+    if stream object scanner::file opened for a specific file, and an 
+		expression record
 
     postcondition -
     calls the primary production, if there is an add operation, it calls the add op 
     production and calls itself again to process the rest of the expression
+		also populates the given expression record
    */
-  void expression ();
+  void expression (compiler::exprRec& result);
 
 //  /*
 //    exponential
@@ -146,24 +150,28 @@ namespace parser {
     primary 
 
     precondition -
-    if stream object scanner::file opened for a specific file
+    if stream object scanner::file opened for a specific file and an
+		expression record
 
     postcondition - 
-    handles the case of id, int literal, or expression primary
+    handles the case of id, int literal, or expression primary populates 
+		the expression record
    */
-  void primary ();
+  void primary (compiler::exprRec& result);
 
   /*
     addOp
 
     precondition -
-    if stream object scanner::file opened for a specific file
+    if stream object scanner::file opened for a specific file, and an
+		operator record
 
     postcondition -
-    checks for the plusOp, or minusOp token
+    checks for the plusOp, or minusOp token, and assigns the proper token
+		to the provided operator record
 
    */
-  void addOp ();
+  void addOp (compiler::opRec& o);
 
   /*
     getNextToken
