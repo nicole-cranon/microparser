@@ -7,7 +7,7 @@
 #ifndef _PARSER
 #define _PARSER
 
-#include "microscanner/src/scanner.h"
+#include "scanner.h"
 
 // TODO : Add equality and exponential operator productions
 

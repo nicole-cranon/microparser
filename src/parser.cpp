@@ -77,6 +77,9 @@ namespace parser {
         stmtList();
         break;
 
+			default :
+				return;
+
     }
 
     std::cout << "\nEnd stmtList\n";
@@ -537,10 +540,15 @@ namespace parser {
 
           scanner::file.seekg (initialPosition);
           std::cerr << "\nLexical Error\n";
+					exit(EXIT_FAILURE);
 
       }
 
     }while (currentChar != EOF && scanner::file.good());
+
+		scanner::file.seekg (initialPosition);
+		std::cerr << "\nLexical Error\n";
+		exit(EXIT_FAILURE);
 
   }
 
